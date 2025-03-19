@@ -7,4 +7,4 @@
       <span class="mb-3 mb-md-0 text-body-secondary">© Rose Brokers</span>
     </div>
   </footer>
-</div>g
+</div>
