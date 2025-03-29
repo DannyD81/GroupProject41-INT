@@ -1,58 +1,81 @@
-header .nav-link {
-  color: white !important; 
-  font-weight: bold;
-  transition: color 0.3s ease;
+
+/* Styling for the button container */
+.calculate {
+    position: fixed; /* Makes the container stay in a fixed position relative to the viewport */
+    bottom: 20px; /* Distance from the bottom edge of the page */
+    right: 20px; /* Distance from the right edge of the page */
+    z-index: 1000; /* Ensures it stays above other elements */
 }
 
-header .nav-link:hover {
-  color: black !important; /* Change color to gold on hover */
+
+
+
+/* Styling for the button */
+.btn-primary {
+    background-color: #007bff; /* Primary blue color */
+    color: #000000; 
+    border: none; /* No border */
+    padding: 10px 20px; /* Adjust padding for spacing */
+    border-radius: 50px; /* Rounded corners for pill shape */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor for interactivity */
+    box-shadow: 0 4px 6px rgb(29, 6, 241); /* Subtle shadow for depth */
 }
 
-.btn {
-  background-color: white !important; 
-  border-color: black !important;
-  color: black !important;
+.btn-primary:hover {
+    background-color: #0056b3; /* Darker blue on hover */
 }
 
-.btn-outline {
-  border-color: black !important;
-  color: black !important;
+
+
+.text-primary {
+    color: black !important; /* Forces black text, overriding Bootstrap's blue */
 }
 
-.btn-outline:hover {
-  background-color: white !important;
-  color: black !important;
-}
 
+
+
+
+
+
+
+
+/* Center everything on the page */
 body {
-  background-color: #0B9719 !important;
-}
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    margin: 0;
+    background-color: #f5f5f5; /* Light background for a clean look */
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Styling for the container */
+  .container {
+    text-align: center;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Adjust the slider width */
+  #loan-amount {
+    width: 300px; /* Customize slider width */
+  }
+  
+  /* Style for the displayed value */
+  #display-value {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #333; /* Darker text for clarity */
+  }
+  
 
-.mortgage-container {
-  margin-top: 50px;
-}
 
-.quote-box {
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  height: 250px;
-}
 
-.quote-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
 
-.quote-text {
-  margin-top: 15px;
-  font-size: 1rem;
-  color: #333;
-}
-
-.save-btn {
-  margin-top: 30px;
-}
 
 
