@@ -1,4 +1,4 @@
-<d?php
+<?php
 // Initialize variables
 $Annual_income = 0;
 $Annual_Expenditure = 0;
@@ -19,7 +19,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         $result = ($Annual_income - $Annual_Expenditure) * 4.5;
 
-    
+       // Redirect to affordability_results.php with result
+       header("Location: affordabili_results.php?result=" . urlencode($result));
+       exit();
         
     }
 }
@@ -38,27 +40,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+
+    <style>
+        body {
+            background-color: #06F01E; 
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+          
+        }
+
+  
+</style>
+
+
+
 </head>
 <body>
 
+
     
+
+
+
+
+
+
+
+
+
+
+
     <header class="text-center mt-5">Affordability Calculator</header> 
 
     <class="container mt-5">
         <h2>Enter Annual income</h2>
         <form method="POST" action="calculator.php">
             <div class="mb-3">
-                <label for="Annual_income" class="form-label">Annual_income (£)</label>
+                <label for="Annual_income" class="form-label">Annual Income (£)</label>
                 <input type="number" class="form-control" id="Annual_income" name="Annual_income" value="<?php echo htmlspecialchars($Annual_income); ?>" required>
             </div>
 
             <div class="mb-3">
-                <label for="deposit" class="form-label">Annual_Expenditure (£)</label>
+                <label for="deposit" class="form-label">Annual Expenditure (£)</label>
                 <input type="number" class="form-control" id="Annual_Expenditure" name="Annual_Expenditure" value="<?php echo htmlspecialchars($Annual_Expenditure); ?>" required>
             </div>
 
 
-
+          <h4> You  can borrow up to...</h4>
 
 
           
@@ -66,28 +97,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="submit" class="btn btn-primary">Calculate</button>
         </form>
 
-        <?php if ($error_message): ?>
+        <?php if (!empty($error_message)): ?>
             <div class="alert alert-danger mt-4">
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
 
         
-        <?php if ($result > 0): ?>
-            <div class="mt-5">
-                <h3>You are eligible for this loan.</h3>
-                <p><strong>Amount based on your calculation:</strong> £<?php echo number_format($result, 2); ?></p>
-            </div>
-        <?php endif; ?>
-        </div>
-    
-    <center>
-            <div class="nav-buttons text-centre">
+
+         <div class="nav-buttons text-centre">
             <button onclick="location.href='index.php'">Back</button>
-            </center>
+            
+ 
+         
+            
+            
 
     <?php include("footer.php"); ?> <!-- Include your footer here -->
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </body>
 </html>
+
 
