@@ -1,28 +1,39 @@
 <?php
-// Initialize variables
-$Annual_income = 0;
-$Annual_Expenditure = 0;
-$result = 0;
+$loan_amount = 0;
+$deposit = 0;
+$loan_term = 0;
+$interest_rate = 0;
+$monthly_payment = 0;
+$total_repay = 0;
+$capital = 0;
+$interest = 0;
 $error_message = "";
-
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $Annual_income = $_POST["Annual_income"];
-    $Annual_Expenditure = $_POST["Annual_Expenditure"];
-    
+    $mortgage_amount = $_POST["mortgage_amount"];
+    $mortgage_term_year = $_POST["mortgage_term_year"];
+    $mortgage_term_month = $_POST["mortgage_term_month"];
+    $interest_rate = $_POST["interest_rate"];
 
     
-    if  ($Annual_income <= 0 || $Annual_Expenditure < 0) {
+    if ($loan_amount <= 0 || $deposit < 0 || $loan_term <= 0 || $interest_rate <= 0) {
         $error_message = "Please enter valid values for all fields.";
     } else {
         
-        $result = ($Annual_income - $Annual_Expenditure) * 4.5;
+        $loan_amount_after_deposit = $loan_amount - $deposit;
+        $monthly_interest_rate = ($interest_rate / 100) / 12;
+        $total_payments = $loan_term * 12;
 
-       // Redirect to affordability_results.php with result
-       header("Location: affordabili_results.php?result=" . urlencode($result));
-       exit();
+    
+        $monthly_payment = $loan_amount_after_deposit * ($monthly_interest_rate * pow(1 + $monthly_interest_rate, $total_payments)) / (pow(1 + $monthly_interest_rate, $total_payments) - 1);
+
         
+        $total_repay = $monthly_payment * $total_payments;
+
+        
+        $capital = $loan_amount_after_deposit;
+        $interest = $total_repay - $capital;
     }
 }
 ?>
@@ -40,104 +51,67 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
-
-
-    <style>
-        body {
-            background-color: #06F01E; 
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-          
-        }
-
-  
-</style>
-
-
-
 </head>
 <body>
 
-
     
+    <h2> Mortgage Calculator</h2> 
 
-
-
-
-
-
-
-
-
-
-
-    <header class="text-center mt-5">Affordability Calculator</header> 
-
-    <class="container mt-5">
-        <h2>Enter Annual income</h2>
+    <div class="container mt-5">
+        <h2>Enter Loan Details</h2>
         <form method="POST" action="calculator.php">
             <div class="mb-3">
-                <label for="Annual_income" class="form-label">Annual Income (£)</label>
-                <input type="number" class="form-control" id="Annual_income" name="Annual_income" value="<?php echo htmlspecialchars($Annual_income); ?>" required>
+                <label for="mortgage_amount" class="form-label">Mortgage Amount (£)</label>
+                <input type="number" class="form-control" id="mortgage_amount" name="mortgage_amount" value="<?php echo htmlspecialchars($mortgage_amount); ?>" required>
+            </div>
+            <h3>Length of Mortgage</h3>
+
+            <div class="mb-3">
+                <label for="mortgage_term_year" class="form-label">Mortgage Term (years) </label>
+                <input type="number" class="form-control" id="mortgage_term_year" name="mortgage_term_year" value="<?php echo htmlspecialchars($mortgage_term_year); ?>" required>
             </div>
 
             <div class="mb-3">
-                <label for="deposit" class="form-label">Annual Expenditure (£)</label>
-                <input type="number" class="form-control" id="Annual_Expenditure" name="Annual_Expenditure" value="<?php echo htmlspecialchars($Annual_Expenditure); ?>" required>
+                <label for="mortgage_term_month" class="form-label">Mortgage Term (Monthly)</label>
+                <input type="number" class="form-control" id="mortgage_term_month" name="mortgage_term_month" value="<?php echo htmlspecialchars($mortgage_term_month); ?>" required>
             </div>
 
-
-          <h4> You  can borrow up to...</h4>
-
-
-          
+            <div class="mb-3">
+                <label for="interest_rate" class="form-label">Interest Rate (%)</label>
+                <input type="number" class="form-control" id="interest_rate" name="interest_rate" value="<?php echo htmlspecialchars($interest_rate); ?>" required>
+            </div>
 
             <button type="submit" class="btn btn-primary">Calculate</button>
         </form>
 
-        <?php if (!empty($error_message)): ?>
+        <?php if ($error_message): ?>
             <div class="alert alert-danger mt-4">
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
 
         
-
-         <div class="nav-buttons text-centre">
+        <?php if ($monthly_payment > 0): ?>
+            <div class="mt-5">
+                <h3>Your results</h3>
+                <p><strong>Your monthly payment will be:</strong> £<?php echo number_format($monthly_payment, 2); ?></p>
+                <p><strong>Total you’ll repay over the term:</strong> £<?php echo number_format($total_repay, 2); ?></p>
+                <h4>Make sure you can afford it!</h4>
+                <p><strong>For example, if your interest rate goes up by 3%, your payment will be:</strong></p>
+                <?php
+                $new_interest_rate = $interest_rate + 3;
+                $new_monthly_payment = ($loan_amount - $deposit) * (($new_interest_rate / 100 / 12) * pow(1 + ($new_interest_rate / 100 / 12), $total_payments)) / (pow(1 + ($new_interest_rate / 100 / 12), $total_payments) - 1);
+                ?>
+                <p>£<?php echo number_format($new_monthly_payment, 2); ?> per month</p>
+            </div>
+        <?php endif; ?>
+    </div>
+    <center>
+            <div class="nav-buttons">
             <button onclick="location.href='index.php'">Back</button>
-            
- 
-         
-            
-            
+            </center>
 
     <?php include("footer.php"); ?> <!-- Include your footer here -->
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </body>
 </html>
-
-
