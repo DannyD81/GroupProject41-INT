@@ -25,10 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $result->fetchArray(SQLITE3_ASSOC);
 
     if ($user && password_verify($password, $user['Password'])) {
-        $_SESSION['UserID'] = $user['USERID'];
+        $_SESSION['user_id'] = $user['USERID'];
         $_SESSION['username'] = $user['Username'];
         $_SESSION['usertype'] = $user['usertype'];
-
+    
         if ($user['usertype'] === 'Broker') {
             header("Location: broker-homepage.php");
         } else {
@@ -38,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $error = "Incorrect email or password. Please try again.";
     }
+    
 }
 ?>
 <!DOCTYPE html>
@@ -85,3 +86,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include("footer.php"); ?>
 </body>
 </html>
+
