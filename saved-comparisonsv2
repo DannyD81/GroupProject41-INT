@@ -1,0 +1,95 @@
+<?php
+session_start();
+$db = new SQLite3('MortgageSystem.db');
+if (!$db) {
+    die("Database connection failed.");
+}
+
+if (!isset($_SESSION['UserID'])) {
+    header("Location: login-page.php");
+    exit();
+}
+
+$user_id = $_SESSION['UserID'];
+
+// Get user's saved quotes for dropdowns
+$quotes_result = $db->query("SELECT QuoteID, Purchaseprice, DepositAmount FROM UserQuotes WHERE UserID = $user_id");
+
+$quotes = [];
+while ($row = $quotes_result->fetchArray(SQLITE3_ASSOC)) {
+    $quotes[] = $row;
+}
+
+// Handle POST submission
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $quote1 = $_POST['quote1'] ?? null;
+    $quote2 = $_POST['quote2'] ?? null;
+    $quote3 = $_POST['quote3'] ?? null;
+
+    // Ensure at least two quotes are selected and all selected values are distinct
+    $selectedQuotes = array_filter([$quote1, $quote2, $quote3]);
+    $uniqueQuotes = array_unique($selectedQuotes);
+
+    if (count($uniqueQuotes) < 2) {
+        echo "<div class='alert alert-warning text-center'>Please select at least 2 different quotes to compare.</div>";
+    } else {
+        $stmt = $db->prepare("INSERT INTO SavedComparisons (UserID, Quote1ID, Quote2ID, Quote3ID, DateSaved) VALUES (:user_id, :q1, :q2, :q3, :date_saved)");
+        $stmt->bindValue(':user_id', $user_id, SQLITE3_INTEGER);
+        $stmt->bindValue(':q1', $quote1 ?: null, SQLITE3_INTEGER);
+        $stmt->bindValue(':q2', $quote2 ?: null, SQLITE3_INTEGER);
+        $stmt->bindValue(':q3', $quote3 ?: null, SQLITE3_INTEGER);
+        $stmt->bindValue(':date_saved', date('Y-m-d H:i:s'), SQLITE3_TEXT);
+
+        if ($stmt->execute()) {
+            echo "<div class='alert alert-success text-center'>Comparison saved successfully!</div>";
+        } else {
+            echo "<div class='alert alert-danger text-center'>Failed to save comparison. Try again.</div>";
+        }
+    }
+}
+?>
+
+
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Save Comparison</title>
+    <link rel="icon" href="logo.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <?php include("navbar.php"); ?>
+
+    <main class="container text-center my-5">
+        <div class="mortgage-container mx-auto" style="max-width: 600px;">
+            <h1 class="h3 fw-bold mb-2">Save Comparison</h1>
+            <h2 class="h5 mb-4">Choose Up to 3 Quotes to Compare</h2>
+
+            <form method="POST" action="save-comparison.php">
+                <?php for ($i = 1; $i <= 3; $i++): ?>
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="quote<?= $i ?>" name="quote<?= $i ?>">
+                            <option value="">Select Quote <?= $i ?></option>
+                            <?php foreach ($quotes as $quote): ?>
+                                <option value="<?= $quote['QuoteID'] ?>">
+                                    Quote #<?= $quote['QuoteID'] ?> - £<?= number_format($quote['Purchaseprice']) ?> with £<?= number_format($quote['DepositAmount']) ?> deposit
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <label for="quote<?= $i ?>">Quote <?= $i ?></label>
+                    </div>
+                <?php endfor; ?>
+
+                <button class="btn btn-primary w-100 py-2 mb-2" type="submit">Save Comparison</button>
+            </form>
+
+            <a href="logged-in-home.php" class="btn btn-outline-secondary w-100 py-2">Back</a>
+        </div>
+    </main>
+
+    <?php include("footer.php"); ?>
+</body>
+</html>
