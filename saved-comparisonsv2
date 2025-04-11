@@ -93,3 +93,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <?php include("footer.php"); ?>
 </body>
 </html>
+
+
+
+
+
+CREATE TABLE IF NOT EXISTS SavedComparisons (
+    ComparisonID INTEGER PRIMARY KEY AUTOINCREMENT,
+    UserID INTEGER NOT NULL,
+    Quote1ID INTEGER,
+    Quote2ID INTEGER,
+    Quote3ID INTEGER,
+    DateSaved TEXT NOT NULL,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (Quote1ID) REFERENCES UserQuotes(QuoteID),
+    FOREIGN KEY (Quote2ID) REFERENCES UserQuotes(QuoteID),
+    FOREIGN KEY (Quote3ID) REFERENCES UserQuotes(QuoteID)
+);
