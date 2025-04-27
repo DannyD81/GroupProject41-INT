@@ -1,73 +1,87 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['UserID'])) {
+    header('Location: login-page.php');
+    exit();
+}
+
+$db = new SQLite3('MortgageSystem.db');
+$products = [];
+
+try {
+    $query = "SELECT * FROM Products";
+    $results = $db->query($query);
+
+    while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+        $products[] = $row;
+    }
+
+    $db->close();
+} catch (Exception $e) {
+    echo "<div class='alert alert-danger'>Error loading products: " . htmlspecialchars($e->getMessage()) . "</div>";
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Products</title>
-
-    <link rel="icon" href="logo.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="style.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 </head>
 <body>
-    <?php include("navbar.php"); ?>
 
-    <main class="container text-center mortgage-container my-5">
-        <h1 class="h3 fw-bold mb-2">Create Mortgage</h1>
-        <h2 class="h5 mb-4">Select up to 3 quotes</h2>
+<?php include("navbar.php"); ?>
 
-        <form id="mortgageForm">
-            <div class="row g-3 justify-content-center">
-                <div class="col-md-6 d-flex align-items-center">
-                    <button type="button" class="btn btn-light w-100">Mortgage 1</button>
-                    <input type="checkbox" class="form-check-input ms-2 mortgage-checkbox">
-                </div>
-                <div class="col-md-6 d-flex align-items-center">
-                    <button type="button" class="btn btn-light w-100">Mortgage 4</button>
-                    <input type="checkbox" class="form-check-input ms-2 mortgage-checkbox">
-                </div>
-                <div class="col-md-6 d-flex align-items-center">
-                    <button type="button" class="btn btn-light w-100">Mortgage 2</button>
-                    <input type="checkbox" class="form-check-input ms-2 mortgage-checkbox">
-                </div>
-                <div class="col-md-6 d-flex align-items-center">
-                    <button type="button" class="btn btn-light w-100">Mortgage 5</button>
-                    <input type="checkbox" class="form-check-input ms-2 mortgage-checkbox">
-                </div>
-                <div class="col-md-6 d-flex align-items-center">
-                    <button type="button" class="btn btn-light w-100">Mortgage 3</button>
-                    <input type="checkbox" class="form-check-input ms-2 mortgage-checkbox">
-                </div>
-                <div class="col-md-6 d-flex align-items-center">
-                    <button type="button" class="btn btn-light w-100">Mortgage 6</button>
-                    <input type="checkbox" class="form-check-input ms-2 mortgage-checkbox">
-                </div>
-            </div>
+<main class="container my-5">
+    <h1 class="h3 mb-4 fw-bold text-center">Select Products</h1>
 
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary w-100 py-2">Compare Mortgage Quotes</button>
-                <a href="create-quote.php" class="btn btn-outline-secondary w-100 py-2 mt-2">Back</a>
-            </div>
-        </form>
-    </main>
+    <form action="compare-products.php" method="post">
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <?php if (count($products) > 0): ?>
+                <?php foreach ($products as $product): ?>
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title"><?= htmlspecialchars($product['Name']) ?></h5>
+                            <p class="card-text">
+                                <strong>Type:</strong> <?= htmlspecialchars($product['productType']) ?><br>
+                                <strong>Affordability:</strong> 
+                                <?php
+                                $ranges = [
+                                    1 => "£30,000–£80,000",
+                                    2 => "£80,000–£130,000",
+                                    3 => "£130,000–£260,000",
+                                    4 => "£260,000–£500,000"
+                                ];
+                                echo isset($ranges[$product['affordabilityRange']]) ? $ranges[$product['affordabilityRange']] : "Unknown";
+                                ?><br>
+                                <strong>Interest Rate:</strong> <?= htmlspecialchars(number_format($product['interestRate'], 2)) ?>%
+                            </p>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="selected_products[]" value="<?= $product['ProductsID'] ?>" id="product<?= $product['ProductsID'] ?>">
+                                <label class="form-check-label" for="product<?= $product['ProductsID'] ?>">
+                                    Select
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="alert alert-warning">No products available.</div>
+            <?php endif; ?>
+        </div>
 
-    <script>
-        document.getElementById("mortgageForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            const selected = document.querySelectorAll(".mortgage-checkbox:checked");
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary">Compare Selected Products</button>
+        </div>
+    </form>
 
-            if (selected.length > 3) {
-                alert("You can only select up to 3 mortgages.");
-            } else if (selected.length === 0) {
-                alert("Please select at least one mortgage.");
-            } else {
-                window.location.href = "compare-mortgages.php";
-            }
-        });
-    </script>
+    <div class="text-center mt-3">
+        <a href="logged-in-home.php" class="btn btn-secondary">Back</a>
+    </div>
+</main>
 
-    <?php include("footer.php"); ?>
+<?php include("footer.php"); ?>
+
 </body>
 </html>
