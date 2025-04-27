@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,7 +29,7 @@
             <div class="d-flex flex-column flex-md-row gap-2 justify-content-center py-2">
                 <a href="create-quote.php" class="btn btn-primary">Create quote</a>
                 <a href="update-details.php" class="btn btn-outline-secondary">Update details</a>
-                <a href="select-saved-mortgages.php" class="btn btn-outline-secondary">View saved quote comparisons</a>
+                <a href="compare-saved-mortgages.php" class="btn btn-outline-secondary">View saved quote comparisons</a>
             </div>
         </div>
 
