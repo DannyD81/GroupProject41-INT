@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $result->fetchArray(SQLITE3_ASSOC);
 
     if ($user && password_verify($password, $user['Password'])) {
-        $_SESSION['user_id'] = $user['USERID'];
+        $_SESSION['UserID'] = $user['USERID'];
         $_SESSION['username'] = $user['Username'];
         $_SESSION['usertype'] = $user['usertype'];
     
