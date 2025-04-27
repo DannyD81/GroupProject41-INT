@@ -1,38 +1,56 @@
 <?php
-session_start();
-$db = new SQLite3('MortgageSystem.db');
-if (!$db) {
-    die("Database connection failed.");
+// Always start the session safely
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-
+// Check if user is logged in
 if (!isset($_SESSION['UserID'])) {
     header("Location: login-page.php");
     exit();
 }
 
-$user_id = $_SESSION['UserID'];
+// Connect to SQLite database
+try {
+    $db = new SQLite3('MortgageSystem.db', SQLITE3_OPEN_READWRITE);
+} catch (Exception $e) {
+    die("Database connection failed: " . htmlspecialchars($e->getMessage()));
+}
 
+$user_id = (int)$_SESSION['UserID'];
 
+// Initialize error message
+$error = "";
+
+// Handle form submission
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $purchaseprice = $_POST['purchaseprice'] ?? null;
     $depositAmount = $_POST['depositAmount'] ?? null;
 
-    if (!empty($purchaseprice) && !empty($depositAmount)) {
-        // Insert into UserQuotes table
+    if ($purchaseprice !== null && $depositAmount !== null && is_numeric($purchaseprice) && is_numeric($depositAmount)) {
+        // Prepare and execute insert statement
         $stmt = $db->prepare("INSERT INTO UserQuotes (UserID, Purchaseprice, DepositAmount) VALUES (:user_id, :purchaseprice, :deposit_amount)");
-        $stmt->bindValue(':user_id', $user_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':purchaseprice', $purchaseprice, SQLITE3_FLOAT);
-        $stmt->bindValue(':deposit_amount', $depositAmount, SQLITE3_FLOAT);
 
-        if ($stmt->execute()) {
-            header("Location: select-products.php"); // success page or next step
+        if (!$stmt) {
+            die("Prepare failed: " . htmlspecialchars($db->lastErrorMsg()));
+        }
+
+        $stmt->bindValue(':user_id', $user_id, SQLITE3_INTEGER);
+        $stmt->bindValue(':purchaseprice', (float)$purchaseprice, SQLITE3_FLOAT);
+        $stmt->bindValue(':deposit_amount', (float)$depositAmount, SQLITE3_FLOAT);
+
+        $result = $stmt->execute();
+
+        if ($result) {
+            $stmt->close();
+            $db->close();
+            header("Location: select-products.php");
             exit();
         } else {
-            echo "<div class='alert alert-danger text-center'>Failed to save quote. Try again.</div>";
+            $error = "Execute failed: " . htmlspecialchars($db->lastErrorMsg());
         }
     } else {
-        echo "<div class='alert alert-warning text-center'>All fields are required.</div>";
+        $error = "Please enter valid numbers for both fields.";
     }
 }
 ?>
@@ -47,31 +65,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <?php include("navbar.php"); ?>
+<?php include("navbar.php"); ?>
 
-    <main class="container text-center my-5">
-        <div class="mortgage-container mx-auto" style="max-width: 500px;">
-            <h1 class="h3 fw-bold mb-2">Create Mortgage</h1>
-            <h2 class="h5 mb-4">Fill Out Information</h2>
+<main class="container text-center my-5">
+    <div class="mortgage-container mx-auto" style="max-width: 500px;">
+        <h1 class="h3 fw-bold mb-2">Create Mortgage</h1>
+        <h2 class="h5 mb-4">Fill Out Information</h2>
 
-            <form method="POST" action="create-quote.php">
-                <div class="form-floating mb-3">
-                    <input type="number" class="form-control" id="purchaseprice" name="purchaseprice" placeholder="Purchase price" required>
-                    <label for="purchaseprice">Purchase Price</label>
-                </div>
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
 
-                <div class="form-floating mb-3">
-                    <input type="number" class="form-control" id="depositAmount" name="depositAmount" placeholder="Deposit Amount" required>
-                    <label for="depositAmount">Deposit Amount</label>
-                </div>
+        <form method="POST" action="">
+            <div class="form-floating mb-3">
+                <input type="number" step="0.01" class="form-control" id="purchaseprice" name="purchaseprice" placeholder="Purchase Price" required>
+                <label for="purchaseprice">Purchase Price</label>
+            </div>
 
-                <button class="btn btn-primary w-100 py-2 mb-2" type="submit">Next</button>
-            </form>
+            <div class="form-floating mb-3">
+                <input type="number" step="0.01" class="form-control" id="depositAmount" name="depositAmount" placeholder="Deposit Amount" required>
+                <label for="depositAmount">Deposit Amount</label>
+            </div>
 
-            <a href="logged-in-home.php" class="btn btn-outline-secondary w-100 py-2">Back</a>
-        </div>
-    </main>
+            <button class="btn btn-primary w-100 py-2 mb-2" type="submit">Next</button>
+        </form>
 
-    <?php include("footer.php"); ?>
+        <a href="logged-in-home.php" class="btn btn-outline-secondary w-100 py-2">Back</a>
+    </div>
+</main>
+
+<?php include("footer.php"); ?>
 </body>
 </html>
