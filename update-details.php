@@ -10,11 +10,11 @@ if (!isset($_SESSION['usertype']) || $_SESSION['usertype'] !== 'User') {
     exit();
 }
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['UserID'])) {
     die("User ID not found in session.");
 }
 
-$userID = intval($_SESSION['user_id']);
+$userID = intval($_SESSION['UserID']);
 $db = new SQLite3("MortgageSystem.db");
 
 $stmt = $db->prepare("SELECT * FROM user WHERE USERID = :id");
