@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="container mt-5">
         <h2>Affordability Calculator</h2>
-        <form method="POST" action="affordability_calculator.php">
+        <form method="POST" action="affordability-calculator.php">
             <div class="mb-3">
                 <label for="annual_income" class="form-label">Annual Income (£)</label>
                 <input type="number" class="form-control" id="annual_income" name="annual_income" value="<?php echo htmlspecialchars($annual_income); ?>" required>
